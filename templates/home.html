@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>SDoH Predictive Visualization Study</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, Arial, sans-serif;
+      background: #f6f7f4;
+      color: #1f2933;
+    }
+
+    .topbar {
+      width: 100%;
+      background: #007176;
+      color: white;
+      padding: 22px 40px;
+      font-size: 26px;
+      font-weight: 700;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 40px auto;
+      padding: 0 24px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 18px;
+      padding: 32px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      margin-bottom: 24px;
+    }
+
+    h1 {
+      margin-top: 0;
+      color: #111827;
+    }
+
+    h2 {
+      margin-top: 30px;
+      color: #007176;
+    }
+
+    p {
+      font-size: 16px;
+      line-height: 1.65;
+    }
+
+    .study-flow {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      margin-top: 24px;
+    }
+
+    .flow-card {
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 20px;
+      background: #fafafa;
+    }
+
+    .flow-card h3 {
+      margin-top: 0;
+      color: #111827;
+    }
+
+    .flow-card p {
+      font-size: 14px;
+    }
+
+    .nav-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 24px;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 14px 18px;
+      border-radius: 12px;
+      background: #007176;
+      color: white;
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    .btn.secondary {
+      background: #111827;
+    }
+
+    .guide-box {
+      background: #eef7f6;
+      border-left: 5px solid #007176;
+      padding: 18px 20px;
+      border-radius: 12px;
+      margin-top: 20px;
+    }
+
+    @media (max-width: 850px) {
+      .study-flow {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="topbar">
+    SDoH Predictive Visualization Study
+  </div>
+
+  <div class="container">
+    <div class="card">
+      <h1>Welcome</h1>
+
+      <p>
+        Thank you for taking the time to review these visualization tools. This web application is designed to support a focus group study about how practitioners understand and use predictive model explanations in healthcare and social service settings.
+      </p>
+
+      <p>
+        The system focuses on predictions related to emergency department utilization and social determinants of health, such as food access, housing stability, healthcare access, and social connectedness. The goal is not to replace professional judgment, but to explore whether different visualizations can help users better understand why a system makes a recommendation.
+      </p>
+
+      <div class="guide-box">
+        <p>
+          During the session, we will walk through three visualization approaches. After each visualization, we will ask questions about what you think the display is showing, how easy it is to understand, how useful it might be in practice, and what concerns or improvements you would suggest.
+        </p>
+      </div>
+
+      <h2>Study Flow</h2>
+
+      <div class="study-flow">
+        <div class="flow-card">
+          <h3>1. Decision Tree Visualization</h3>
+          <p>
+            Shows the step-by-step logic of one decision tree model and allows users to highlight specific SDoH features.
+          </p>
+        </div>
+
+        <div class="flow-card">
+          <h3>2. Sunburst Visualization</h3>
+          <p>
+            Shows patterns across multiple decision trees to help identify consistent drivers of risk across models.
+          </p>
+        </div>
+
+        <div class="flow-card">
+          <h3>3. Interactive Dashboard</h3>
+          <p>
+            Allows users to enter patient-related values and view a prediction, probability, and explanation pathway.
+          </p>
+        </div>
+      </div>
+
+      <div class="nav-buttons">
+        <a class="btn" href="/decision-tree">Start: Decision Tree</a>
+        <a class="btn" href="/sunburst">Sunburst Visualization</a>
+        <a class="btn" href="/dashboard">Interactive Dashboard</a>
+        <a class="btn secondary" href="/focus-questions">Focus Group Questions</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

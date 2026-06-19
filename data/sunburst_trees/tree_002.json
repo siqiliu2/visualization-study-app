@@ -1,0 +1,91 @@
+            {
+              "name": "HCS ≤ 1.08",
+              "node_id": 3,
+              "feature": "HCS",
+              "p": 0.341874,
+              "children": [
+                {
+                  "name": "EDD ≤ 1.895",
+                  "node_id": 4,
+                  "feature": "EDD",
+                  "p": 0.526111,
+                  "children": [
+                    
+                        
+                            {
+                              "name": "EDD ≤ 0.595",
+                              "node_id": 7,
+                              "feature": "EDD",
+                              "p": 0.456577,
+                              "children": [
+                                
+                                {
+              "name": "ECS ≤ 8.25",
+              "node_id": 8,
+              "feature": "ECS",
+              "p": 0.402330,
+              "children": [
+                {
+                  "name": "Leaf",
+                  "node_id": 9,
+                  "feature": "LEAF",
+                  "p": 0.344650
+                },
+                {
+                  "name": "Leaf",
+                  "node_id": 10,
+                  "feature": "LEAF",
+                  "p": 0.461110
+                }
+              ]
+            },
+                                {
+                                  "name": "NPE ≤ 4.5",
+                                  "node_id": 9,
+                                  "feature": "NPE",
+                                  "p": 0.480632,
+                                  "children": [
+                                    {
+                                      "name": "CSC ≤ 0.275",
+                                      "node_id": 10,
+                                      "feature": "CSC",
+                                      "p": 0.361277,
+                                      "children": [
+                                        {
+                                          "name": "Leaf",
+                                          "node_id": 11,
+                                          "feature": "LEAF",
+                                          "p": 0.313588
+                                        },
+                                        {
+              "name": "ECS ≤ 8.25",
+              "node_id": 8,
+              "feature": "ECS",
+              "p": 0.402330,
+              "children": [
+                {
+                  "name": "Leaf",
+                  "node_id": 9,
+                  "feature": "LEAF",
+                  "p": 0.344650
+                },
+                {
+                  "name": "Leaf",
+                  "node_id": 10,
+                  "feature": "LEAF",
+                  "p": 0.461110
+                }
+              ]
+            }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              
+                         
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }

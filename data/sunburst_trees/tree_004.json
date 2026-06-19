@@ -1,0 +1,202 @@
+{
+  "name": "EDD ≤ 1.60",
+  "node_id": 0,
+  "feature": "EDD",
+  "p": 0.486300,
+  "children": [
+    {
+      "name": "HCS ≤ 1.90",
+      "node_id": 1,
+      "feature": "HCS",
+      "p": 0.391520,
+      "children": [
+        {
+          "name": "NPE ≤ 4.10",
+          "node_id": 2,
+          "feature": "NPE",
+          "p": 0.334880,
+          "children": [
+            {
+              "name": "CSC ≤ 2.55",
+              "node_id": 3,
+              "feature": "CSC",
+              "p": 0.276410,
+              "children": [
+                {
+                  "name": "Leaf",
+                  "node_id": 4,
+                  "feature": "LEAF",
+                  "p": 0.188700
+                },
+                {
+                  "name": "FAC ≤ 4.85",
+                  "node_id": 5,
+                  "feature": "FAC",
+                  "p": 0.331990,
+                  "children": [
+                    {
+                      "name": "Leaf",
+                      "node_id": 6,
+                      "feature": "LEAF",
+                      "p": 0.271220
+                    },
+                    {
+                      "name": "Leaf",
+                      "node_id": 7,
+                      "feature": "LEAF",
+                      "p": 0.402540
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "ECS ≤ 8.25",
+              "node_id": 8,
+              "feature": "ECS",
+              "p": 0.402330,
+              "children": [
+                {
+                  "name": "Leaf",
+                  "node_id": 9,
+                  "feature": "LEAF",
+                  "p": 0.344650
+                },
+                {
+                      "name": "NPE ≤ 3.10",
+                      "node_id": 6,
+                      "feature": "NPE",
+                      "p": 0.289330,
+                      "children": [
+                        {
+                          "name": "Leaf",
+                          "node_id": 7,
+                          "feature": "LEAF",
+                          "p": 0.210740
+                        },
+                        {
+                          "name": "Leaf",
+                          "node_id": 8,
+                          "feature": "LEAF",
+                          "p": 0.357910
+                        }
+                      ]
+                    },
+                    {
+                      "name": "NPE ≤ 3.10",
+                      "node_id": 6,
+                      "feature": "NPE",
+                      "p": 0.289330,
+                      "children": [
+                        {
+                          "name": "Leaf",
+                          "node_id": 7,
+                          "feature": "LEAF",
+                          "p": 0.210740
+                        },
+                        {
+                          "name": "Leaf",
+                          "node_id": 8,
+                          "feature": "LEAF",
+                          "p": 0.357910
+                        }
+                      ]
+                    },
+                {
+                  "name": "Leaf",
+                  "node_id": 10,
+                  "feature": "LEAF",
+                  "p": 0.461110
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "FAC ≤ 2.40",
+          "node_id": 11,
+          "feature": "FAC",
+          "p": 0.457900,
+          "children": [
+            {
+              "name": "Leaf",
+              "node_id": 12,
+              "feature": "LEAF",
+              "p": 0.398100
+            },
+            {
+              "name": "CSC ≤ 4.05",
+              "node_id": 13,
+              "feature": "CSC",
+              "p": 0.521240,
+              "children": [
+                {
+                  "name": "ECS ≤ 6.10",
+                  "node_id": 14,
+                  "feature": "ECS",
+                  "p": 0.488520,
+                  "children": [
+                    {
+                      "name": "Leaf",
+                      "node_id": 15,
+                      "feature": "LEAF",
+                      "p": 0.433910
+                    },
+                    {
+                      "name": "Leaf",
+                      "node_id": 16,
+                      "feature": "LEAF",
+                      "p": 0.547330
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ECS ≤ 7.20",
+      "node_id": 17,
+      "feature": "ECS",
+      "p": 0.569840,
+      "children": [
+        {
+          "name": "NPE ≤ 3.25",
+          "node_id": 18,
+          "feature": "NPE",
+          "p": 0.512330,
+          "children": [
+            {
+              "name": "Leaf",
+              "node_id": 19,
+              "feature": "LEAF",
+              "p": 0.441770
+            },
+            {
+              "name": "HCS ≤ 2.45",
+              "node_id": 20,
+              "feature": "HCS",
+              "p": 0.586990,
+              "children": [
+                {
+                  "name": "Leaf",
+                  "node_id": 21,
+                  "feature": "LEAF",
+                  "p": 0.520880
+                },
+                {
+                  "name": "Leaf",
+                  "node_id": 22,
+                  "feature": "LEAF",
+                  "p": 0.649520
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

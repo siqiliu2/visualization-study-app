@@ -1,0 +1,157 @@
+{
+  "name": "FAC ≤ 3.90",
+  "node_id": 0,
+  "feature": "FAC",
+  "p": 0.472913,
+  "children": [
+    {
+      "name": "CSC ≤ 2.10",
+      "node_id": 1,
+      "feature": "CSC",
+      "p": 0.392104,
+      "children": [
+        {
+          "name": "EDD ≤ 1.25",
+          "node_id": 2,
+          "feature": "EDD",
+          "p": 0.301882,
+          "children": [
+            {
+              "name": "HCS ≤ 1.55",
+              "node_id": 3,
+              "feature": "HCS",
+              "p": 0.245110,
+              "children": [
+                {
+                  "name": "Leaf",
+                  "node_id": 4,
+                  "feature": "LEAF",
+                  "p": 0.142600
+                },
+                {
+                  "name": "ECS ≤ 6.20",
+                  "node_id": 5,
+                  "feature": "ECS",
+                  "p": 0.338940,
+                  "children": [
+                    {
+                      "name": "NPE ≤ 3.10",
+                      "node_id": 6,
+                      "feature": "NPE",
+                      "p": 0.289330,
+                      "children": [
+                        {
+                          "name": "Leaf",
+                          "node_id": 7,
+                          "feature": "LEAF",
+                          "p": 0.210740
+                        },
+                        {
+                          "name": "Leaf",
+                          "node_id": 8,
+                          "feature": "LEAF",
+                          "p": 0.357910
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "NPE ≤ 4.80",
+          "node_id": 9,
+          "feature": "NPE",
+          "p": 0.458771,
+          "children": [
+            {
+              "name": "ECS ≤ 7.90",
+              "node_id": 10,
+              "feature": "ECS",
+              "p": 0.423580,
+              "children": [
+                {
+                  "name": "Leaf",
+                  "node_id": 11,
+                  "feature": "LEAF",
+                  "p": 0.365120
+                },
+                {
+                  "name": "Leaf",
+                  "node_id": 12,
+                  "feature": "LEAF",
+                  "p": 0.501300
+                }
+              ]
+            }
+          ]
+        }
+        
+      ]
+    },
+    {
+      "name": "HCS ≤ 2.85",
+      "node_id": 13,
+      "feature": "HCS",
+      "p": 0.561220,
+      "children": [
+        {
+          "name": "EDD ≤ 0.95",
+          "node_id": 14,
+          "feature": "EDD",
+          "p": 0.498340,
+          "children": [
+            {
+              "name": "Leaf",
+              "node_id": 15,
+              "feature": "LEAF",
+              "p": 0.402910
+            },
+            {
+                      "name": "NPE ≤ 3.10",
+                      "node_id": 6,
+                      "feature": "NPE",
+                      "p": 0.289330,
+                      "children": [
+                        {
+                          "name": "Leaf",
+                          "node_id": 7,
+                          "feature": "LEAF",
+                          "p": 0.210740
+                        },
+                        {
+                          "name": "Leaf",
+                          "node_id": 8,
+                          "feature": "LEAF",
+                          "p": 0.357910
+                        }
+                      ]
+                    },
+            {
+              "name": "CSC ≤ 3.30",
+              "node_id": 16,
+              "feature": "CSC",
+              "p": 0.562440,
+              "children": [
+                {
+                  "name": "Leaf",
+                  "node_id": 17,
+                  "feature": "LEAF",
+                  "p": 0.476880
+                },
+                {
+                  "name": "Leaf",
+                  "node_id": 18,
+                  "feature": "LEAF",
+                  "p": 0.641730
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

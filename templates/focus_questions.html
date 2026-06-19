@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Focus Group Guide</title>
+  <style>
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      font-family: Inter, Arial, sans-serif;
+      background: #f5f7f6;
+      color: #1f2933;
+    }
+
+    .top-bar {
+      background: #007176;
+      color: white;
+      padding: 24px 48px;
+    }
+
+    .top-bar h1 {
+      margin: 0;
+      font-size: 28px;
+    }
+
+    nav {
+      background: #111827;
+      padding: 12px 48px;
+      display: flex;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    nav a:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 34px auto;
+      padding: 0 28px 60px 28px;
+    }
+
+    .section {
+      background: white;
+      border-radius: 18px;
+      padding: 28px 32px;
+      margin-bottom: 22px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+
+    h2 {
+      margin-top: 0;
+      color: #007176;
+      border-bottom: 2px solid #e7eeee;
+      padding-bottom: 10px;
+    }
+
+    h3 {
+      margin-top: 26px;
+      color: #0f3f40;
+    }
+
+    p {
+      line-height: 1.65;
+      font-size: 16px;
+    }
+
+    ul {
+      line-height: 1.7;
+    }
+
+    li {
+      margin-bottom: 8px;
+    }
+
+    .moderator-note {
+      background: #fff7df;
+      border-left: 5px solid #fdb515;
+      padding: 14px 18px;
+      border-radius: 12px;
+      margin: 16px 0;
+      font-size: 15px;
+    }
+
+    .question-block {
+      background: #f8faf9;
+      border: 1px solid #dfe7e5;
+      border-radius: 14px;
+      padding: 18px 20px;
+      margin-top: 16px;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+
+    a.button {
+      display: inline-block;
+      text-decoration: none;
+      background: #007176;
+      color: white;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-weight: 700;
+    }
+
+    a.button:hover {
+      background: #005c60;
+    }
+  </style>
+</head>
+
+<body>
+  <header class="top-bar">
+    <h1>Focus Group Guide</h1>
+  </header>
+
+  <nav>
+    <a href="/">Home</a>
+    <a href="/decision-tree">Decision Tree</a>
+    <a href="/sunburst">Sunburst</a>
+    <a href="/dashboard">Dashboard</a>
+  </nav>
+
+  <main class="container">
+
+    <section class="section">
+      <h2>1. Introduction</h2>
+
+      <p style="text-align: justify;">
+        Thank you for agreeing to speak with us today. We really appreciate your time and your willingness to share your perspectives.
+      </p>
+
+      <p style="text-align: justify;">
+        We are a research team at UMBC working on tools that help practitioners better understand how predictive models generate recommendations in healthcare and social service settings.
+      </p>
+
+      <p style="text-align: justify;">
+        Today, we will show you three different visualizations based on a decision tree model that predicts risk. A decision tree model works by looking at different factors step by step, such as housing stability, food access, healthcare access, or social support, and using those factors to estimate whether someone may be at higher or lower risk for a particular outcome, such as repeated emergency department utilization or a non-emergency emergency department visit. The model follows a series of decision points, similar to a flowchart, to arrive at a recommendation or prediction.
+      </p>
+
+      <p style="text-align: justify;">
+        Examples of predictions might include risk of unmet social needs, such as food insecurity or housing instability, or health-related risks, such as repeated emergency department utilization or missed follow-up care. We are interested in your thoughts about how understandable, useful, and actionable these visualizations are.
+      </p>
+
+      <p style="text-align: justify;">
+        This session will take about 30–45 minutes. We would like to record this session so we have an accurate record of our conversation. Is this okay?
+      </p>
+
+      <p>
+        Do you have any questions before we begin?
+      </p>
+    </section>
+
+    <section class="section">
+      <h2>2. Opening Questions</h2>
+
+      <div class="moderator-note">
+        Suggested time: maximum 10 minutes.
+      </div>
+
+      <ul>
+        <li>What is your current role?</li>
+        <li>How long have you been in this role?</li>
+        <li>Thinking about the last time you provided support to a client or patient, can you walk me through your decision-making process?</li>
+        <ol type="a">
+          <li>Is this how you typically make decisions, or was there something unique about this situation?</li>
+          <li>What kinds of information or factors were most important in that decision?</li>
+        </ol>
+        <li>Have you ever used any data tools or dashboards in your work?</li>
+          <ol type="a">
+            <li>If yes, how have you used them?</li>
+            <li>If no, why not?</li>
+          </ol>
+        <li>What is your general impression of predictive modeling or automated decision-support systems?</li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h2>3. Context Setting</h2>
+
+      <p style="text-align: justify;">
+        We are going to show you a system that helps identify patients who may be at higher risk of frequent emergency department use, particularly when that risk is driven by both medical conditions and social factors like housing instability, food access, or social support.
+      </p>
+
+      <p style="text-align: justify;">
+        The system uses information on social determinants of health, such as food access, housing stability, and social connectedness, together with basic health-related factors, such as chronic medical conditions, prior emergency department visits, mental health concerns, or missed follow-up care, to estimate the likelihood that a patient may need additional support.
+      </p>
+
+      <p style="text-align: justify;">
+        The system outputs a risk prediction (for example, higher or lower risk) and an explanation of why that prediction was made. In practice, this output could be used to help prioritize which patients to follow-up with, support care planning decisions, or provide additional context when deciding what type of intervention might be most helpful.
+      </p>
+
+      <p style="text-align: justify;">
+        We are exploring different ways to visualize how to present the model’s reasoning in a way that is understandable and useful for people in your role, so that it is effective in supporting you in making decisions in practice.
+      </p>
+
+      <p>
+        We will show three visualization approaches: 
+        <ol type="1">
+          <li>decision tree visualization</li>
+          <li>sunburst visualization</li>
+          <li>interactive dashboard</li>
+        </ol>
+      </p>
+    </section>
+
+    <section class="section">
+      <h2>4. Visualization Guide</h2>
+
+      <div class="moderator-note">
+        Next, we will explain the tools, show them with sliders + prediction + path.
+      </div>
+
+      <h3>Decision Tree Visualization</h3>
+
+      <p style="text-align: justify;">
+        The goal of the first visualization is to help users understand why the system identifies a specific patient as being at higher or lower risk for emergency department utilization. Rather than only showing a prediction, the visualization is designed to explain the reasoning behind that recommendation in a step-by-step way. We will now walk through the visualization together. This tool displays a decision tree, which works similarly to a flowchart. Starting from the top of the tree, the system evaluates different social and health-related factors one step at a time, such as housing stability, food access, chronic medical conditions, or prior healthcare use. As the system moves through the tree, it follows different branches depending on the patient’s information until it reaches a final prediction.
+      </p>
+
+      <p style="text-align: justify;">
+        The visualization also allows users to interact with the model. Users can select specific features to highlight where and how those factors influence the prediction pathway. The highlighted path shows which conditions contributed to the final recommendation and how the model arrived at its conclusion. For example, a social worker might be reviewing a patient who has diabetes and unstable housing. The model may flag this individual as higher risk for emergency department use. The decision tree visualization shows exactly how that conclusion was reached by walking through the sequence of factors considered, such as medical instability, access to food, and prior healthcare use. Users can interactively select specific features to see where and how they influence the model’s structure. This allows you to trace model logic step-by-step and better interpret how specific factors, such as food access or social connectedness, affect risk classification. The purpose of this visualization is to support understanding and informed decision-making by helping users interpret how different factors contribute to the model’s recommendation.
+      </p>
+
+      <div class="button-row">
+        <a class="button" href="/decision-tree">Open Decision Tree Visualization</a>
+      </div>
+
+      <h3>Sunburst Visualization</h3>
+
+      <p style="text-align: justify;">
+        The goal of the second visualization is to reveal patterns across multiple predictive models and identify consistent drivers of risk. For example, a social worker may notice that one decision tree suggests housing instability as the main driver of risk, while another emphasizes food access. This can make it unclear which factor to prioritize in practice. To address this, the sunburst visualization aggregates multiple decision trees and visualizes them in a hierarchical sunburst diagram, where each segment represents a feature split and its frequency across models. Instead of focusing on a single model, this approach captures variation and redundancy among many high-performing trees. Users can interactively highlight features to see how often they appear and where they occur in the decision structure. This helps identify which factors are consistently important and how they interact with others across different model configurations. By presenting aggregated patterns rather than a single pathway, the visualization supports a more robust and system-level understanding of risk, helping users prioritize features that are stable and reliable across models.</p>
+
+      <div class="button-row">
+        <a class="button" href="/sunburst">Open Sunburst Visualization</a>
+      </div>
+
+      <h3>Interactive Dashboard</h3>
+
+      <p style="text-align: justify;">
+        The goal of the third visualization is to translate predictive model outputs, such as a patient being flagged as having a high risk of emergency department utilization (e.g., 72% predicted probability), into actionable, user-specific insights. For example, a social worker reviewing a patient may see that the individual is classified as high risk, but may not immediately understand why the patient was flagged or which factors contributed most to that recommendation.
+      </p>
+
+      <p style="text-align: justify;">
+        We will now walk through the dashboard together. This tool allows users to enter information about a patient’s situation, including social and health-related factors such as housing instability, food access, healthcare access, or social support. Based on those inputs, the system compares the information to patterns learned from previous patients in the predictive model and identifies the most relevant decision pathway. For example, if a user inputs that a patient has unstable housing and limited access to food, the system will search for the decision rules in the model that most closely match those conditions. The dashboard then displays the predicted risk level, the probability associated with that prediction, and the reasoning pathway that contributed to the recommendation. Instead of showing the full tree like the previous visualization, it identifies the most applicable path and presents the corresponding prediction, probability, and supporting conditions. When an exact match is not available, the system provides the best partial match, ensuring robustness in real-world scenarios with incomplete data. In some cases, the patient’s information may closely match a complete rule already represented in the model. In other situations, some information may be missing or may not perfectly fit an existing pathway. When this happens, the system identifies the closest partial match based on the available information and still provides an explanation of the prediction. This is intended to better reflect real-world practice, where practitioners may not always have complete information about every patient. The dashboard also highlights which conditions were satisfied, which conditions were not satisfied, and how different factors contributed to the prediction. This helps users understand not only the final recommendation but also the reasoning process behind it.
+      </p>
+
+      <p style="text-align: justify;">
+        This enables users to understand not only the predicted risk level but also the reasoning behind it, including which conditions were satisfied or violated. By focusing on individual-level explanations, this tool helps practitioners interpret predictions in context and supports decision-making for targeted interventions, such as prioritizing follow-up or connecting patients to specific social resources. For example, if the model highlights housing instability and food insecurity as key drivers of risk for a specific individual, a social worker may decide to prioritize housing support services or connect the patient with local food assistance programs. If transportation barriers appear in the explanation, the practitioner might arrange transportation services to improve access to primary care and reduce avoidable emergency visits. In this way, the tool not only explains the prediction but also helps translate it into concrete, actionable steps tailored to each patient’s situation.
+      </p>
+
+      <div class="button-row">
+        <a class="button" href="/dashboard">Open Interactive Dashboard</a>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>5. Per-Visualization Questions</h2>
+
+      <div class="moderator-note">
+        Ask these questions after each visualization. Participants will first be invited to interact freely with the visualization.
+      </div>
+
+      <div class="question-block">
+        <h3>Understanding and Interpretation</h3>
+        <ul>
+          <li>As you explore this visualization, can you describe what you think it is showing?</li>
+          <li>What do you think the system is trying to communicate?</li>
+          <li>Can you walk me through what you are noticing as you interact with it?</li>
+          <li>If you were explaining this visualization to a colleague who is seeing it for the first time, how would you explain it?</li>
+          <li>Does interacting with this visualization help you understand how the system arrived at its recommendation? Why or why not?</li>
+          <li>What does the "decision path" tell you?</li>
+        </ul>
+      </div>
+
+      <div class="question-block">
+        <h3>Usefulness & Usability</h3>
+        <ul>
+          <li>How would you use this information in your work, if at all?</li>
+          <li>Can you see yourself using this tool? If so, please describe how you could see yourself using it? If not mentioned ask: How often would you use this tool?</li>
+          <li>What decisions do you think this could help you make in your work?
+          <li>How easy or difficult is this visualization to use?</li>
+          <li>What do you think about being able to adjust inputs (e.g., sliders)</li>
+          <li>If I had not walked you through the visualization, do you think you would have been able to interpret it?</li>
+          <li>Is there anything about that visualization that you found confusing?</li>
+        </ul>
+      </div>
+
+      <div class="question-block">
+        <h3>Improvement & Design Feedback</h3>
+        <ul>
+          <li>What would make this visualization easier to understand?</li>
+          <li>Is there anything you would change about how information is presented?</li>
+        </ul>
+      </div>
+
+      <div class="question-block">
+        <h3>Trust & Concerns</h3>
+        <ul>
+          <li>Does seeing this increase or decrease your trust in the system?</li>
+          <li>What concerns do you have about this type of visualization?</li>
+          <li>What concerns do you have about relying on this tool?</li>
+          <li>What might clients or patients be concerned about your use of this tool?</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>6. Cross-Visualization Questions</h2>
+
+      <ul>
+        <li>Please rank the three visualizations according to which one you prefer overall. Please explain your ranking.</li>
+        <li>Which one was easiest to understand?</li>
+        <li>Which one felt most trustworthy?</li>
+        <li>Which one would you actually use in your daily work?</li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h2>7. Closing Questions</h2>
+
+      <ul>
+        <li>What do you see as the benefits of using predictive models with these visualizations?</li>
+        <li>What risks or harms should we be aware of?</li>
+        <li>How can we design these tools to better support practitioners like you?</li>
+        <li>Do you have any questions for us?</li>
+      </ul>
+
+      <p>
+        Thank you so much for your time today. We greatly appreciate it.
+      </p>
+    </section>
+
+  </main>
+</body>
+</html>

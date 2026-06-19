@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Decision Tree Sunburst</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+
+  <style>
+    html, body { height: 100%; }
+
+    body{
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+
+      /* Background image */
+      background-image: url("/static/background3.jpg");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 0;   /* remove padding */
+      text-align: center;
+      overflow-y: auto;
+    }
+
+    /* dark overlay for readability */
+    body::before{
+      content:"";
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* keep content above overlay */
+    h1, .layout { position: relative; z-index: 1; }
+
+    h1{
+      margin: 0 0 18px 0;
+      color: #fff;
+      letter-spacing: 0.2px;
+      font-size: 28px;
+    }
+
+    
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    /* ---------- TOP HEADER ---------- */
+    
+    .top-header{
+      position: relative;
+      z-index: 2;   /* above background overlay */
+      width: 100%;
+      background: #007176;  /* umbc green */
+      margin-bottom: 0px;
+    }
+
+    .top-header-inner{
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px 18px;
+      font-size: 28px;
+      font-weight: 600;
+      color: #ffffff;
+      letter-spacing: 0.3px;
+    }   
+
+    .sidebar-title{
+      margin: 0px 0 10px 0;
+      font-size: 16px;
+      color: #fff;
+      padding: 0px 14px;
+      letter-spacing: 0.2px;
+    }
+
+    .feature-list{
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    #chart {
+      width: min(1000px, calc(100vw - 390px));
+
+      height: calc(100vh - 80px);
+
+      min-height: 700px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+      overflow: hidden;
+
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .feature-item{ 
+      width: 100%;
+      padding: 14px 14px;
+      border-radius: 10px;
+      background: #1b1b1b;
+      color: white;
+      text-align: left;
+      cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.14);
+      transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+.feature-item:hover {
+  transform: translateY(-1px);
+  background: #262626;
+  border-color: rgba(255,255,255,0.22);
+}
+
+.feature-item.active {
+  outline: 2px solid rgba(255,255,255,0.18);
+  background: #2c2c2c;
+}
+
+.feature-header-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.swatch{
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  flex: 0 0 auto;
+  border: 1px solid rgba(255,255,255,0.25);
+}
+
+.feature-code {
+  font-size: 13px;
+  font-weight: 800;
+  color: white;
+  letter-spacing: 0.5px;
+  line-height: 1;
+}
+
+.feature-desc {
+  font-size: 13px;
+  line-height: 1.35;
+  color: rgba(255,255,255,0.82);
+  text-align: left;
+}
+
+    .clear-btn{
+      margin-top: 12px;
+      width: 100%;
+      padding: 10px 10px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.16);
+      background: rgba(255, 255, 255, 0.22);
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .clear-btn:hover{
+      background: rgba(0,0,0,0.30);
+    }
+
+    .sidebar-hint{
+      margin: 10px 2px 0 2px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.70);
+    }
+
+    
+
+    .main {
+      min-width: 0;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 0px;
+      margin: 0;
+    }
+
+    /* Layout under the top header */
+    .layout {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 360px minmax(0, 1fr);
+      gap: 0;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      align-items: stretch;
+    }
+
+    /* Sidebar: touch left edge and fill height */
+    .sidebar{
+      position: sticky;
+      top: 0;                             /* ✅ stick to top of viewport */
+      height: 100vh;                      /* ✅ fill from top to bottom of screen */
+      align-self: start;
+      margin: 0;
+      padding: 0;
+      overflow-y: auto;                   /* ✅ scroll inside sidebar if long */
+    }
+
+    /* Sidebar “card” should become the sidebar itself (full height, no rounded corners) */
+    .sidebar-card{
+      height: 100%;
+      width: 100%;
+      border-radius: 0;                   /* ✅ touches edges cleanly */
+      background: #000;                   /* ✅ solid black */
+      box-shadow: none;                   /* optional */
+      padding: 15px 15px;
+      text-align: left;
+    }
+
+    .tooltip{
+      position: fixed;
+      padding: 10px 12px;
+      background: rgba(0,0,0,0.78);
+      color: white;
+      border-radius: 10px;
+      pointer-events: none;
+      opacity: 0;
+      font-size: 14px;
+      line-height: 1.35;
+      border: 1px solid rgba(255,255,255,0.18);
+      backdrop-filter: blur(6px);
+      z-index: 9999;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="top-header">
+    <div class="top-header-inner">
+      Decision Tree Sunburst Visualization
+    </div>
+  </div>
+
+  <div class="layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-card">
+        <!-- <h2 class="sidebar-title">SDoH Features</h2> -->
+
+        <div id="featureList" class="feature-list"></div>
+
+        <button id="clearFeature" class="clear-btn" type="button">
+          Clear highlight
+        </button>
+
+        <p class="sidebar-hint">
+          Tip: click a feature to highlight all nodes split on that feature.
+        </p>
+      </div>
+    </aside>
+
+    <!-- Chart -->
+    <main class="main">
+      <div id="chart"></div>
+    </main>
+  </div>
+
+  <div id="tooltip" class="tooltip"></div>
+
+  <script>
+    // -----------------------------
+    // Your original JS (kept)
+    // -----------------------------
+
+    // Thickness exaggeration: p in [0,1] -> ring thickness
+    const thicknessScale = d3.scaleLinear()
+      .domain([0, 1])
+      .range([10, 70]);
+
+    // Feature palette (match your tree project)
+    const featureColors = {
+      "FAC": "#A1C4FD",
+      "CSC": "#C2F0C2",
+      "HCS": "#FDDC9B",
+      "ECS": "#E6CCFF",
+      "NPE": "#FFB6C1",
+      "EDD": "#FFFACD",
+      "LEAF": "#9aa4b2",
+      "ROOT": "#9aa4b2"
+    };
+
+    // Sidebar labels (edit text if you want)
+    const featureLabels = {
+      "FAC": "Food access reflects food insecurity and the ability to obtain nutritious meals.",
+      "CSC": "Social connectedness reflects social support, isolation, and ties to community networks.",
+      "HCS": "Healthcare services reflects access to medical care and continuity of care.",
+      "ECS": "Economic stability reflects income, employment, and financial security.",
+      "NPE": "Neighborhood physical environment reflects housing, safety, and local conditions.",
+      "EDD": "Education reflects educational attainment, literacy, and access to learning resources."
+    };
+
+    const width = 820;
+    const radius = width / 2;
+    const HOVER_EXPAND = 18;
+
+    let selectedFeature = null;   // <- NEW: current highlighted feature
+    let arcPathSelection = null;  // <- NEW: holds d3 selection of paths for updating styles
+
+    fetch("/sunburst_data")
+      .then(r => r.json())
+      .then(data => drawSunburst(data))
+      .catch(err => console.error("Failed to load sunburst data:", err));
+
+    function computeRadii(root) {
+      root.each(d => {
+        if (!d.parent) d.inner = 0;
+        else d.inner = d.parent.outer;
+        d.outer = d.inner + thicknessScale(d.data.p || 0);
+      });
+    }
+
+    function drawSunburst(data) {
+      buildSidebar(); // <- NEW
+
+      const tooltip = d3.select("#tooltip");
+
+      const root = d3.hierarchy(data).sum(d => 1);
+
+      // Partition gives x0/x1 for angles; y is not used since we custom radii
+      d3.partition().size([2 * Math.PI, radius])(root);
+      computeRadii(root);
+
+      // Find the actual maximum radius used by the generated sunburst
+      const maxOuterRadius =
+        d3.max(root.descendants(), d => d.outer) + HOVER_EXPAND;
+
+      // Smaller padding means a stronger zoom
+      const VIEW_PADDING = 2;
+      const VIEW_RADIUS = maxOuterRadius + VIEW_PADDING;
+      const VIEW_SIZE = VIEW_RADIUS * 2;
+
+      // Negative value moves the visible area upward.
+      // Increase this gradually if needed.
+      const VERTICAL_SHIFT = -20;
+
+      const svgElement = d3.select("#chart")
+        .append("svg")
+        .attr(
+          "viewBox",
+          `${-VIEW_RADIUS} ${-VIEW_RADIUS + VERTICAL_SHIFT} ${VIEW_SIZE} ${VIEW_SIZE}`
+        )
+        .attr("preserveAspectRatio", "xMidYMid meet")
+        .style("width", "100%")
+        .style("height", "100%")
+        .style("display", "block")
+        .style("overflow", "hidden");
+
+      // The viewBox is now centered around 0,0,
+      // so no translate(radius, radius) is needed.
+      const svg = svgElement.append("g");
+
+      const arc = d3.arc()
+        .startAngle(d => d.x0)
+        .endAngle(d => d.x1)
+        .innerRadius(d => d.inner)
+        .outerRadius(d => d.outer + (d.expand ? HOVER_EXPAND : 0));
+
+      // Keep the selection so we can update styles when clicking sidebar
+      arcPathSelection = svg.selectAll("path")
+        .data(root.descendants())
+        .enter()
+        .append("path")
+          .attr("display", d => d.depth ? null : "none")
+          .attr("d", arc)
+          .style("stroke", "none")
+          .style("fill", d => featureColors[d.data.feature] || "#6b7280")
+          .style("opacity", 0.95)
+          .on("mouseover", function(event, d) {
+            d.expand = true;
+            d3.select(this).transition().duration(160).attr("d", arc);
+
+            tooltip
+              .style("opacity", 1)
+              .html(`
+                <b>${escapeHtml(d.data.name || "")}</b><br/>
+                feature: ${escapeHtml(d.data.feature || "")}<br/>
+                freq: ${d.data.freq ?? "N/A"}<br/>
+                p(avg): ${typeof d.data.p === "number" ? d.data.p.toFixed(3) : "N/A"}<br/>
+                coverage: ${typeof d.data.pct === "number" ? (d.data.pct * 100).toFixed(1) + "%" : "N/A"}
+              `);
+          })
+          .on("mousemove", function(event) {
+            tooltip
+              .style("left", (event.pageX + 12) + "px")
+              .style("top", (event.pageY + 12) + "px");
+          })
+          .on("mouseout", function(event, d) {
+            d.expand = false;
+            d3.select(this).transition().duration(160).attr("d", arc);
+            tooltip.style("opacity", 0);
+          });
+
+      // Apply initial style (no highlight)
+      applyFeatureHighlight();
+    }
+
+    // -----------------------------
+    // Sidebar (NEW)
+    // -----------------------------
+    function buildSidebar() {
+      const list = d3.select("#featureList");
+
+      const features = ["FAC","CSC","HCS","ECS","NPE","EDD"];
+
+      const items = list.selectAll(".feature-item")
+        .data(features)
+        .enter()
+        .append("div")
+        .attr("class", "feature-item")
+        .on("click", (event, feature) => {
+          selectedFeature = (selectedFeature === feature) ? null : feature;
+          updateSidebarActive();
+          applyFeatureHighlight();
+        });
+
+      const header = items.append("div")
+        .attr("class", "feature-header-row");
+
+      header.append("div")
+        .attr("class", "swatch")
+        .style("background", f => featureColors[f] || "#999");
+
+      header.append("div")
+        .attr("class", "feature-code")
+        .text(f => f);
+
+      items.append("div")
+        .attr("class", "feature-desc")
+        .text(f => featureLabels[f] || "");
+
+      d3.select("#clearFeature").on("click", () => {
+        selectedFeature = null;
+        updateSidebarActive();
+        applyFeatureHighlight();
+      });
+
+      updateSidebarActive();
+    }
+
+    function updateSidebarActive() {
+      d3.select("#featureList")
+        .selectAll(".feature-item")
+        .classed("active", d => d === selectedFeature);
+    }
+    
+
+    
+
+        
+    // -----------------------------
+    // Highlight behavior (NEW)
+    // Make selected feature look richer / more saturated.
+    // Others fade slightly.
+    // -----------------------------
+    function applyFeatureHighlight() {
+      if (!arcPathSelection) return;
+
+      arcPathSelection
+        .style("opacity", d => {
+          if (!selectedFeature) return 0.95;
+          return (d.data.feature === selectedFeature) ? 1.0 : 0.25;
+        })
+        .style("filter", d => {
+          if (!selectedFeature) return "none";
+          return (d.data.feature === selectedFeature)
+            ? "saturate(1.9) brightness(1.05)"
+            : "saturate(0.85)";
+        })
+        .style("stroke", d => {
+          if (!selectedFeature) return "none";
+          return (d.data.feature === selectedFeature)
+            ? "rgba(255,255,255,0.55)"
+            : "none";
+        })
+        .style("stroke-width", d => {
+          if (!selectedFeature) return 0;
+          return (d.data.feature === selectedFeature) ? 1.2 : 0;
+        });
+    }
+
+    // Tiny safety helper for tooltip text
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;");
+    }
+  </script>
+</body>
+</html>
