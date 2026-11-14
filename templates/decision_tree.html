@@ -1,246 +1,64 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Decision Tree Visualization</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Decision Tree Visualization</title>
+<style>
+body{font-family:'Inter',sans-serif;background-image:url('{{ url_for('static', filename='background3.jpg') }}');background-size:cover;background-position:center;background-repeat:no-repeat;background-attachment:fixed;margin:0;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+.sidebar{width:360px;flex:0 0 360px;background:#111;display:flex;flex-direction:column;justify-content:space-between;padding:15px;box-sizing:border-box;overflow-y:auto}
+.top-header{position:relative;z-index:2;width:100%;background:#007176}.top-header-inner{max-width:1200px;margin:0 auto;padding:18px;font-size:28px;font-weight:600;color:white;letter-spacing:.3px;text-align:center}.page-layout{flex:1;display:flex;width:100%;min-height:0}
+.buttons{display:flex;flex-direction:column;gap:14px;width:100%}.show-all-btn{border:1px solid #ffffff29;width:100%;padding:10px 0;border-radius:20px;background:#ffffff38;color:white;font:inherit;cursor:pointer}.show-all-btn:hover{transform:translateY(-1px);filter:brightness(.95)}.feature-card{border:1px solid #ffffff1a;width:100%;padding:14px;border-radius:8px;background:#1b1b1b;color:white;text-align:left;cursor:pointer;transition:background .2s,transform .2s,border-color .2s;box-sizing:border-box}.feature-card:hover{transform:translateY(-1px);background:#262626;border-color:#fff3}.feature-card.active{outline:2px solid #ffffff2e;background:#2c2c2c}.feature-header{display:flex;align-items:center;gap:10px;margin-bottom:8px}.feature-swatch{width:12px;height:12px;border-radius:4px;display:inline-block;background:var(--feature-color);border:1px solid #ffffff2e}.feature-code{font-size:13px;font-weight:800;color:white;letter-spacing:.5px;line-height:1}.feature-desc{font-size:14px;line-height:1.35;color:#ffffffd1}.school-icon{width:180px;margin:28px auto 10px;opacity:.92;transition:transform .3s}.school-icon:hover{transform:scale(1.05)}
+.main-content{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column;overflow:hidden;box-sizing:border-box}.tree-toolbar{padding:12px 18px;background:#fff4bf;border-bottom:1px solid #e4d697;display:flex;flex-wrap:wrap;align-items:center;gap:10px;font-size:13px;color:#243848}.tree-toolbar button{font:inherit;padding:7px 12px;border:1px solid #aabcc6;border-radius:8px;background:white;cursor:pointer}.tree-toolbar p{margin:0;flex:1;min-width:200px}.tree-viewport{flex:1;min-height:0;overflow:auto;position:relative;overscroll-behavior:contain}.tree-viewport svg{display:block;max-width:none;flex:none}.node{cursor:pointer;outline:none}.node:focus-visible rect{stroke:#006bca;stroke-width:4}.node text{pointer-events:none}.node .title{font-size:16px;font-weight:700;fill:#142735}.node .detail{font-size:12px;fill:#334f60}.node .action{font-size:12px;fill:#235779}.link{fill:none;stroke:#425b69;stroke-width:1.8}.edge-label{font-size:12px;fill:#243e4d;paint-order:stroke;stroke:white;stroke-width:4px;stroke-linejoin:round}button:focus-visible{outline:3px solid #3c9fff;outline-offset:3px}.status{margin:0;padding:8px 18px;background:#ffffffe8;font-size:13px;color:#334f60}.status:empty{display:none}
+@media(max-width:800px){.sidebar{width:230px;flex-basis:230px;padding:10px}.feature-card{padding:10px}.feature-desc{font-size:12px}.buttons{gap:10px}.top-header-inner{font-size:23px}}@media(max-width:520px){.sidebar{width:150px;flex-basis:150px}.feature-desc{font-size:11px}.top-header-inner{font-size:19px}.tree-toolbar{padding:8px}}
+.node.high-utilization text{fill:#ffffff}
 
-  <script src="https://d3js.org/d3.v7.min.js"></script>
-
-  
-
-  <style>
-  body {
-    font-family: 'Inter', sans-serif;
-    background-image: url('{{ url_for('static', filename='background3.jpg') }}');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    overflow: hidden;
-  }
-
-  /* Sidebar */
-  .sidebar {
-  width: 360px;
-  background: #111111;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 15px 15px;
-  box-sizing: border-box;
-  }
-  
-  /* ---------- TOP HEADER ---------- */
-    
-    .top-header{
-      position: relative;
-      z-index: 2;   /* above background overlay */
-      width: 100%;
-      background: #007176;  /* umbc green */
-      margin-bottom: 0px;
-    }
-
-    .top-header-inner{
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 18px 18px;
-      font-size: 28px;
-      font-weight: 600;
-      color: #ffffff;
-      letter-spacing: 0.3px;
-      text-align: center;
-    }   
-    .page-layout {
-      flex: 1;
-      display: flex;
-      width: 100%;
-      min-height: 0;
-    }
-
-  .buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    width: 100%;
-  }
-
-  .show-all-btn {
-    border: 1px solid rgba(255,255,255,0.16);
-    width: 100%;
-    padding: 10px 0px;
-    border-radius: 20px;
-    background: rgba(255, 255, 255, 0.22);
-    color: #fff;
-    font-family: 'Inter', sans-serif;
-    cursor: pointer;
-    
-  }
-
-  .show-all-btn:hover {
-    transform: translateY(-1px);
-    filter: brightness(0.95);
-  }
-
-  .feature-card {
-    border: 1px solid rgba(255,255,255,0.10);
-    width: 100%;
-    padding: 14px 14px;
-    border-radius: 8px;
-    background: #1b1b1b;
-    color: white;
-    text-align: left;
-    cursor: pointer;
-    transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
-    box-sizing: border-box;
-  }
-
-  .feature-card:hover {
-    transform: translateY(-1px);
-    background: #262626;
-    border-color: rgba(255,255,255,0.20);
-  }
-
-  .feature-card.active {
-    outline: 2px solid rgba(255,255,255,0.18);
-    background: #2c2c2c;
-  }
-
-  .feature-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 8px;
-  }
-
-  .feature-swatch {
-    width: 12px;
-    height: 12px;
-    border-radius: 4px;
-    display: inline-block;
-    background: var(--feature-color);
-    border: 1px solid rgba(255,255,255,0.18);
-  }
-
-  .feature-code {
-    font-size: 13px;
-    font-weight: 800;
-    color: white;
-    letter-spacing: 0.5px;
-    line-height: 1;
-  }
-
-  .feature-desc {
-    font-size: 14px;
-    line-height: 1.35;
-    color: rgba(255,255,255,0.82);
-  }
-
-  .school-icon {
-    width: 180px;
-    margin: 28px auto 10px auto;
-    opacity: 0.92;
-    transition: transform 0.3s ease;
-  }
-
-  .school-icon:hover {
-    transform: scale(1.05);
-  }
-
-  /* Main content */
-  .main-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    overflow-y: auto;
-    padding: 40px;
-    box-sizing: border-box;
-  }
-
-  h1 {
-    text-align: center;
-    margin-bottom: 30px;
-    margin-top: 30px;
-    color: #000000;
-  }
-
-  h2 {
-    color: white;
-    margin-top: 50px;
-  }
-
-
-  img#tree-image {
-    max-width: 100%;
-    height: auto;
-    margin-top: 50px
-    margin: 40px auto 10px auto;
-    display: block;
-    border: none !important;
-    padding: 16px 18px;
-    background: transparent;
-  }
-
-  
-  </style>
+.sunburst-next{position:fixed;right:24px;bottom:24px;z-index:10;display:inline-flex;align-items:center;gap:10px;padding:13px 20px;border-radius:24px;background:#007176;color:#fff;text-decoration:none;font-size:14px;font-weight:600;box-shadow:0 4px 16px #0003;border:1px solid #ffffff66}.sunburst-next:hover{background:#005c60}.sunburst-next:focus-visible{outline:3px solid #ffd966;outline-offset:4px}.tree-viewport{padding-bottom:80px;box-sizing:border-box}@media(max-width:520px){.sunburst-next{right:12px;bottom:12px;padding:11px 15px;font-size:12px}}
+</style>
 </head>
-
 <body>
-  <div class="top-header">
-    <div class="top-header-inner">
-      Decision Tree Visualization
-    </div>
-  </div>
-
-  <div class="page-layout">
-    <!-- Sidebar -->
-    <div class="sidebar">
-      <div class="buttons">
-        
-        {% for feature, desc in feature_explanations.items() %}
-          <button
-            type="button"
-            class="feature-card {% if selected == feature %}active{% endif %}"
-            onclick="updateTree('{{ feature }}')"
-            data-feature="{{ feature }}"
-            style="--feature-color: {{ feature_colors.get(feature, '#D0D0D0') }};"
-          >
-            <div class="feature-header">
-              <span class="feature-swatch"></span>
-              <span class="feature-code">{{ feature }}</span>
-            </div>
-            <div class="feature-desc">{{ desc }}</div>
-          </button>
-        {% endfor %}
-        <button type="button" class="show-all-btn" onclick="updateTree('')">Show All</button>
-      </div>
-
-    </div>
-
-    <!-- Main content -->
-    <div class="main-content">
-
-      <img id="tree-image" src="{{ url_for('tree_image', feature=selected) }}">
-
-      
-    </div>
-  </div>
-  <script>
-  function updateTree(feature) {
-    const img = document.getElementById("tree-image");
-
-    img.src = "/tree_image?feature=" + feature + "&t=" + new Date().getTime();
-
-    document.querySelectorAll(".feature-card").forEach(card => {
-      card.classList.remove("active");
-      if (card.dataset.feature === feature) {
-        card.classList.add("active");
-      }
-    });
-  }
+<div class="top-header"><div class="top-header-inner">Decision Tree Visualization</div></div>
+<div class="page-layout">
+<aside class="sidebar" aria-label="Highlight a feature"><div class="buttons">
+{% for feature, desc in feature_explanations.items() %}
+<button type="button" class="feature-card {% if selected == feature %}active{% endif %}" data-feature="{{ feature }}" style="--feature-color: {{ feature_colors.get(feature, '#D0D0D0') }};">
+<div class="feature-header"><span class="feature-swatch"></span><span class="feature-code">{{ feature }}</span></div><div class="feature-desc">{{ desc }}</div></button>
+{% endfor %}
+<button type="button" class="show-all-btn" id="show-all">Show All</button>
+</div></aside>
+<main class="main-content">
+<div class="tree-toolbar"><p>Click a decision to expand or collapse its branches. Scroll up to revisit parents, or sideways to explore siblings.</p><button id="root-button">Go to root</button><button id="collapse-button">Collapse all</button></div>
+<p class="status" id="status" role="status">Loading tree…</p>
+<div class="tree-viewport" id="viewport" tabindex="0" aria-label="Scrollable decision tree"><svg id="tree" role="group" aria-label="Expandable decision tree"></svg></div>
+</main></div>
+<a class="sunburst-next" href="{{ url_for('sunburst_page') }}" aria-label="Next visualization: Sunburst">Next: Sunburst visualization <span aria-hidden="true">→</span></a>
+<script>
+'use strict';
+const featureColors={{ feature_colors | tojson }};
+let selected={{ selected | tojson }}||'';
+const viewport=document.getElementById('viewport'),svg=document.getElementById('tree'),status=document.getElementById('status');
+const NS='http://www.w3.org/2000/svg',W=250,H=126,GAP=32,LEVEL=200,PAD=50;
+let nodes=new Map(),expanded=new Set(),positions=new Map(),root=null,focused=null;
+function kind(n){if(!n)return 'missing';if(n.node_type==='truncated'||n.is_truncated===true)return 'truncated';return n.is_leaf===true?'leaf':'split'}
+function children(n){return kind(n)==='split'?[['left_child','≤'],['right_child','>']].filter(([key])=>n[key]!=null).map(([key,op])=>({id:n[key],op})):[]}
+function title(n,id){const k=kind(n);if(k==='missing')return `Node ${id} omitted`;if(k==='truncated')return 'Subtree omitted';if(k==='leaf')return n.predicted_class===1?'High ED utilization':n.predicted_class===0?'Low ED utilization':'Leaf';return `${n.feature} ≤ ${n.threshold_text??n.threshold}`}
+function probability(n){const p=n?.p_positive;return typeof p==='number'&&Number.isFinite(p)&&p>=0&&p<=1?`${n.probability_source==='synthetic_demo'?'Demo probability':'Positive-class probability'}: ${(p*100).toFixed(1)}%`:'Probability unavailable'}
+function make(tag,attrs={},text){const e=document.createElementNS(NS,tag);for(const[k,v]of Object.entries(attrs))e.setAttribute(k,v);if(text!==undefined)e.textContent=text;return e}
+function center(id,smooth=true){const p=positions.get(id);if(!p)return;const motion=smooth&&!matchMedia('(prefers-reduced-motion: reduce)').matches;viewport.scrollTo({left:Math.max(0,p.x-viewport.clientWidth/2),top:Math.max(0,p.y+H/2-viewport.clientHeight/2),behavior:motion?'smooth':'instant'})}
+function collapse(id){expanded.delete(id);for(const child of children(nodes.get(id)))if(expanded.has(child.id))collapse(child.id)}
+function draw(){if(root===null)return;const widths=new Map(),visible=[],edges=[],seen=new Set();let maxDepth=0;
+function measure(id,depth){if(seen.has(id))throw Error('Tree has a repeated or circular child reference.');seen.add(id);maxDepth=Math.max(maxDepth,depth);const cs=expanded.has(id)?children(nodes.get(id)):[];const width=cs.length?Math.max(W,cs.reduce((sum,c)=>sum+measure(c.id,depth+1),0)+(cs.length-1)*GAP):W;widths.set(id,width);return width}
+try{measure(root,0)}catch(e){status.textContent=e.message;return}
+const totalWidth=Math.max(widths.get(root)+2*PAD,viewport.clientWidth),totalHeight=Math.max(PAD*2+maxDepth*LEVEL+H,viewport.clientHeight);positions=new Map();
+function place(id,start,depth){const x=start+widths.get(id)/2,y=PAD+depth*LEVEL;positions.set(id,{x,y});visible.push(id);let left=start;for(const child of expanded.has(id)?children(nodes.get(id)):[]){place(child.id,left,depth+1);edges.push({from:id,to:child.id,op:child.op});left+=widths.get(child.id)+GAP}}
+place(root,(totalWidth-widths.get(root))/2,0);svg.replaceChildren();svg.setAttribute('width',totalWidth);svg.setAttribute('height',totalHeight);
+for(const edge of edges){const a=positions.get(edge.from),b=positions.get(edge.to),mid=a.y+H+(LEVEL-H)/2;svg.append(make('path',{d:`M${a.x},${a.y+H} V${mid} H${b.x} V${b.y}`,class:'link'}));svg.append(make('text',{x:b.x+(b.x<a.x?-10:10),y:b.y-12,'text-anchor':b.x<a.x?'end':'start',class:'edge-label'},edge.op))}
+for(const id of visible){const n=nodes.get(id),p=positions.get(id),k=kind(n),cs=children(n),canExpand=cs.length>0;const action=canExpand?(expanded.has(id)?'− Collapse branches':'+ Expand next level'):k==='leaf'?'Terminal leaf':'Remaining structure unavailable';const label=title(n,id);const g=make('g',{class:'node',transform:`translate(${p.x-W/2},${p.y})`,tabindex:'0',role:'button','aria-label':`${label}. ${probability(n)}. ${action}`,'data-node-id':id});if(canExpand)g.setAttribute('aria-expanded',expanded.has(id)?'true':'false');const high=k==='leaf'&&n.predicted_class===1,low=k==='leaf'&&n.predicted_class===0;if(high)g.classList.add('high-utilization');const fill=high?'#c62828':low?'#f8bbd0':selected&&n?.feature!==selected?'#ffffff':featureColors[n?.feature]||(k==='truncated'||k==='missing'?'#fff2cc':'#f0f3f5');g.append(make('rect',{width:W,height:H,rx:k==='split'?10:28,fill,stroke:id===focused?'#006b9c':'#334b59','stroke-width':id===focused?3:1.2}));g.append(make('title',{},`${label}\n${probability(n)}${n?.n_samples!=null?'\nTraining samples: '+n.n_samples:''}`));g.append(make('text',{x:W/2,y:24,'text-anchor':'middle',class:'detail'},`Node ${id}${k==='leaf'?' · Leaf':''}`));g.append(make('text',{x:W/2,y:48,'text-anchor':'middle',class:'title'},label));g.append(make('text',{x:W/2,y:72,'text-anchor':'middle',class:'detail'},probability(n)));g.append(make('text',{x:W/2,y:92,'text-anchor':'middle',class:'detail'},k==='truncated'?'Classification unavailable':''));g.append(make('text',{x:W/2,y:113,'text-anchor':'middle',class:'action'},action));const activate=()=>{focused=id;if(canExpand){if(expanded.has(id))collapse(id);else expanded.add(id)}draw();const target=[...svg.querySelectorAll('[data-node-id]')].find(x=>Number(x.dataset.nodeId)===id);target?.focus({preventScroll:true});requestAnimationFrame(()=>center(id))};g.addEventListener('click',activate);g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();activate()}});svg.append(g)}
+status.textContent='';
+}
+function updateTree(feature){selected=feature;document.querySelectorAll('.feature-card').forEach(c=>c.classList.toggle('active',c.dataset.feature===feature));draw()}
+document.querySelectorAll('.feature-card').forEach(c=>c.addEventListener('click',()=>updateTree(c.dataset.feature)));document.getElementById('show-all').onclick=()=>updateTree('');document.getElementById('root-button').onclick=()=>{focused=root;draw();center(root)};document.getElementById('collapse-button').onclick=()=>{expanded.clear();focused=root;draw();center(root)};
+let resizeTimer;window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{draw();center(focused??root,false)},120)});
+(async()=>{try{const response=await fetch('/api/decision-tree');if(!response.ok)throw Error(`Request failed (${response.status})`);const data=await response.json();if(data.error)throw Error(data.error);nodes=new Map(data.nodes.map(n=>[n.node_id,n]));root=data.root_id;if(!nodes.has(root))throw Error('Tree root missing');focused=root;expanded.add(root);draw();center(root,false)}catch(e){status.textContent=`Unable to load tree: ${e.message}`}})();
 </script>
 </body>
 </html>

@@ -243,6 +243,43 @@
       backdrop-filter: blur(6px);
       z-index: 9999;
     }
+
+    .dashboard-next {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      z-index: 100;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 13px 20px;
+      border: 1px solid rgba(255,255,255,0.4);
+      border-radius: 24px;
+      background: #007176;
+      color: #fff;
+      font: 600 14px 'Inter', sans-serif;
+      text-decoration: none;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    }
+    .dashboard-next:hover { background: #005c60; }
+    .dashboard-next:focus-visible { outline: 3px solid #ffd966; outline-offset: 4px; }
+    @media (max-width: 520px) {
+      .dashboard-next { right: 12px; bottom: 12px; padding: 11px 15px; font-size: 12px; }
+    }
+
+    /* Match the decision-tree instruction bar, above the chart only. */
+    .main { flex-direction: column; align-items: stretch; }
+    .sunburst-tip {
+      width: 100%;
+      padding: 16px 18px;
+      background: #fff4bf;
+      border-bottom: 1px solid #e4d697;
+      color: #243848;
+      font-size: 13px;
+      line-height: 1.5;
+      text-align: left;
+      flex-shrink: 0;
+    }
   </style>
 </head>
 
@@ -265,17 +302,23 @@
           Clear highlight
         </button>
 
-        <p class="sidebar-hint">
-          Tip: click a feature to highlight all nodes split on that feature.
-        </p>
+
       </div>
     </aside>
 
     <!-- Chart -->
     <main class="main">
+      <div class="sunburst-tip" role="note">Tip: click a feature to highlight all nodes split on that feature.
+          Freq counts feature occurrences across all included trees. Probability(avg) is the mean positive-class probability over
+          valid occurrences of that feature. The rings preserve hierarchy.
+          </div>
       <div id="chart"></div>
     </main>
   </div>
+
+  <a class="dashboard-next" href="{{ url_for('dashboard_page') }}" aria-label="Next visualization: Dashboard">
+    Next: Dashboard visualization <span aria-hidden="true">→</span>
+  </a>
 
   <div id="tooltip" class="tooltip"></div>
 
@@ -385,7 +428,7 @@
           .attr("display", d => d.depth ? null : "none")
           .attr("d", arc)
           .style("stroke", "none")
-          .style("fill", d => featureColors[d.data.feature] || "#6b7280")
+          .style("fill", d => d.data.outcome === "high" ? "#c62828" : d.data.outcome === "low" ? "#f8bbd0" : featureColors[d.data.feature] || "#6b7280")
           .style("opacity", 0.95)
           .on("mouseover", function(event, d) {
             d.expand = true;
@@ -395,10 +438,10 @@
               .style("opacity", 1)
               .html(`
                 <b>${escapeHtml(d.data.name || "")}</b><br/>
-                feature: ${escapeHtml(d.data.feature || "")}<br/>
-                freq: ${d.data.freq ?? "N/A"}<br/>
-                p(avg): ${typeof d.data.p === "number" ? d.data.p.toFixed(3) : "N/A"}<br/>
-                coverage: ${typeof d.data.pct === "number" ? (d.data.pct * 100).toFixed(1) + "%" : "N/A"}
+                Freq: ${d.data.freq ?? "N/A"}<br/>
+                ${d.data.metric_scope === "leaf_outcome_global" ? "(leaf occurrences in this outcome group, all included trees)" : "(feature occurrences, all included trees)"}<br/>
+                Probability(avg): ${Number.isFinite(d.data.p) ? d.data.p.toFixed(3) : "N/A"}<br/>
+                ${d.data.metric_scope === "leaf_outcome_global" ? "(mean positive-class probability for this leaf outcome group)" : "(feature-wide positive-class probability)"}
               `);
           })
           .on("mousemove", function(event) {

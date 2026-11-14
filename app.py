@@ -109,75 +109,90 @@ def probability_to_color(p: float) -> str:
     return f"#{r:02x}{g:02x}{b:02x}"
 
 
-def visualize_tree(file_path: Path, highlight: Optional[str] = None) -> io.BytesIO:
+def build_tree_graph(file_path: Path, highlight: Optional[str] = None) -> Digraph:
+    """Render both legacy nodes and text-reconstructed nodes without inventing statistics."""
+    import math
+
     nodes = load_nodes(file_path)
+    if not nodes:
+        raise ValueError(f"No tree nodes found in {file_path}")
+
+    def probability(node):
+        value = node.get("p_positive")
+        if value is None or isinstance(value, bool):
+            return None
+        try:
+            value = float(value)
+        except (TypeError, ValueError):
+            return None
+        return value if math.isfinite(value) and 0 <= value <= 1 else None
 
     dot = Digraph()
-    dot.attr(
-        size="4,4",
-        dpi="260",
-        rankdir="TB",
-        splines="ortho",
-        fontname="Inter",
-        bgcolor="transparent"
-    )
-
-    dot.graph_attr.update({"margin": "0", "pad": "0"})
+    # The reconstructed tree has hundreds of nodes. Avoid shrinking it to 4x4 inches.
+    dot.attr(dpi="120", rankdir="TB", splines="polyline",
+             fontname="Inter", bgcolor="transparent")
+    dot.graph_attr.update({"margin": "0", "pad": "0.1"})
     dot.node_attr.update({"margin": "0.15,0.07"})
-    dot.edge_attr.update({
-        "color": "black",
-        "fontcolor": "black",
-        "penwidth": "1.2"
-    })
+    dot.edge_attr.update({"color": "black", "fontcolor": "black", "penwidth": "1.2"})
 
     for node_id, node in nodes.items():
-        if node["is_leaf"]:
-            label = f"Leaf\np={node['p_positive']:.3f}"
+        truncated = node.get("node_type") == "truncated" or node.get("is_truncated") is True
+        leaf = not truncated and node.get("is_leaf") is True
+        feature = node.get("feature")
+        p = probability(node)
+        p_text = f"p={p:.3f}" if p is not None else "Probability unavailable"
+        fontcolor = "black"
+        if truncated:
+            label = "Subtree omitted\nClassification unavailable"
+            depth = node.get("reported_subtree_depth")
+            if depth is not None:
+                label += f"\nReported subtree depth: {depth}"
+            fillcolor, shape = "#FFF2CC", "ellipse"
+        elif leaf:
+            label = "Leaf"
+            if node.get("predicted_class") is not None:
+                label += f"\nClass: {node['predicted_class']}"
+            label += "\n" + p_text
+            fillcolor = probability_to_color(p) if p is not None else "#E6E6E6"
+            fontcolor = "white" if p is not None else "black"
+            shape = "ellipse"
         else:
-            try:
-                threshold = float(node["threshold"])
-                label = f"{node['feature']} ≤ {threshold:.3f}\np={node['p_positive']:.3f}"
-            except Exception:
-                label = f"{node['feature']} ≤ {node['threshold']}\np={node['p_positive']:.3f}"
-
-        feature = node["feature"]
-
-        if node["is_leaf"]:
-            fillcolor = probability_to_color(float(node["p_positive"]))
-            fontcolor = "white"
-        else:
-            if highlight:
-                fillcolor = feature_colors.get(feature, "#D0D0D0") if feature == highlight else "#E6E6E6"
+            threshold = node.get("threshold")
+            if threshold is None:
+                raise ValueError(f"Split node {node_id} has no threshold")
+            if node.get("threshold_precision") == "printed_only":
+                threshold_text = node.get("threshold_text", str(threshold))
+                label = f"{feature} ≤ {threshold_text} (rounded)"
             else:
-                fillcolor = feature_colors.get(feature, "#D0D0D0")
-            fontcolor = "black"
+                label = f"{feature} ≤ {float(threshold):.3f}"
+            label += "\n" + p_text
+            fillcolor = (feature_colors.get(feature, "#D0D0D0")
+                         if not highlight or feature == highlight else "#E6E6E6")
+            shape = "box"
+        dot.node(str(node_id), label, style="filled,rounded", fillcolor=fillcolor,
+                 color="black", penwidth="1", shape=shape,
+                 fontname="Inter", fontcolor=fontcolor)
 
-        shape = "ellipse" if node["is_leaf"] else "box"
-
-        dot.node(
-            str(node_id),
-            label,
-            style="filled,rounded",
-            fillcolor=fillcolor,
-            color="black",
-            penwidth="1",
-            shape=shape,
-            fontname="Inter",
-            fontcolor=fontcolor
-        )
-
+    omitted = set()
     for node_id, node in nodes.items():
-        if not node["is_leaf"]:
-            left_child = node.get("left_child")
-            right_child = node.get("right_child")
+        if (node.get("is_leaf") is True or node.get("node_type") == "truncated"
+                or node.get("is_truncated") is True):
+            continue
+        for key, branch in (("left_child", "≤"), ("right_child", ">")):
+            child = node.get(key)
+            if child is None:
+                continue
+            # Legacy partial files may reference nodes absent from the file.
+            if child not in nodes and child not in omitted:
+                dot.node(str(child), f"Node {child}\nSubtree not included",
+                         shape="ellipse", style="filled", fillcolor="#FFF2CC")
+                omitted.add(child)
+            dot.edge(str(node_id), str(child), label=branch)
+    return dot
 
-            if left_child is not None:
-                dot.edge(str(node_id), str(left_child))
 
-            if right_child is not None:
-                dot.edge(str(node_id), str(right_child))
-
-    return io.BytesIO(dot.pipe(format="png"))
+def visualize_tree(file_path: Path, highlight: Optional[str] = None) -> io.BytesIO:
+    return io.BytesIO(build_tree_graph(file_path, highlight).pipe(format="png"))
 
 
 @app.route("/decision-tree")
@@ -190,6 +205,19 @@ def decision_tree_page():
         feature_colors=feature_colors,
         feature_explanations=feature_explanations
     )
+
+
+@app.route("/api/decision-tree")
+def decision_tree_data():
+    nodes = load_nodes(PARTIAL_TREE_JSONL)
+    if not nodes:
+        return jsonify({"error": "The tree file contains no nodes."}), 422
+    child_ids = {n.get(k) for n in nodes.values()
+                 for k in ("left_child", "right_child") if n.get(k) is not None}
+    roots = [i for i in nodes if i not in child_ids]
+    if len(roots) != 1:
+        return jsonify({"error": "Expected one tree root."}), 422
+    return jsonify({"root_id": roots[0], "nodes": list(nodes.values())})
 
 
 @app.route("/tree_image")
@@ -241,34 +269,40 @@ def node_key(n: Dict[str, Any]) -> Tuple[str, str]:
 
 
 def aggregate_trees(trees: List[Dict[str, Any]]) -> Dict[str, Any]:
-    total = len(trees)
+    """Preserve display paths; compute tooltip statistics across feature occurrences."""
+    import math
+
+    feature_stats: Dict[Tuple[str, Any], Dict[str, Any]] = {}
 
     def new_agg_node(feature: str, name: str) -> Dict[str, Any]:
-        return {
-            "feature": feature,
-            "name": name,
-            "freq": 0,
-            "p_sum": 0.0,
-            "p_count": 0,
-            "children_map": {}
-        }
+        return {"feature": feature, "name": name, "children_map": {}}
 
     root = new_agg_node("ROOT", "Aggregate Sunburst")
 
     def merge(parent_agg: Dict[str, Any], node: Dict[str, Any]) -> None:
         feature, name = node_key(node)
-        cmap: Dict[Tuple[str, str], Dict[str, Any]] = parent_agg["children_map"]
-
-        if (feature, name) not in cmap:
-            cmap[(feature, name)] = new_agg_node(feature, name)
-
-        agg = cmap[(feature, name)]
-        agg["freq"] += 1
-
-        p = safe_float(node.get("p"), None)
-        if p is not None:
-            agg["p_sum"] += p
-            agg["p_count"] += 1
+        raw_p = node.get("p", node.get("p_positive"))
+        p = None if isinstance(raw_p, bool) else safe_float(raw_p)
+        if p is not None and (not math.isfinite(p) or not 0 <= p <= 1):
+            p = None
+        is_leaf = feature.upper() == "LEAF"
+        outcome = None
+        if is_leaf:
+            outcome = "unknown" if p is None else ("high" if p >= 0.5 else "low")
+            name = {"high": "High ED Utilization", "low": "Low ED Utilization",
+                    "unknown": "ED Utilization Unknown"}[outcome]
+        # Keep leaf outcomes separate even when they share a display parent.
+        metric_key = ("leaf", outcome) if is_leaf else ("feature", feature)
+        cmap = parent_agg["children_map"]
+        agg = cmap.setdefault((feature, name), new_agg_node(feature, name))
+        agg["metric_key"] = metric_key
+        agg["outcome"] = outcome
+        if is_leaf or feature.upper() not in {"ROOT", "UNKNOWN", "NONE", ""}:
+            stats = feature_stats.setdefault(metric_key, {"freq": 0, "p_sum": 0.0, "p_count": 0})
+            stats["freq"] += 1
+            if p is not None:
+                stats["p_sum"] += p
+                stats["p_count"] += 1
 
         children = node.get("children", [])
         if isinstance(children, list):
@@ -278,7 +312,6 @@ def aggregate_trees(trees: List[Dict[str, Any]]) -> Dict[str, Any]:
 
     for tree in trees:
         children = tree.get("children")
-
         if isinstance(children, list) and tree.get("feature") in (None, "ROOT", "root", "Root"):
             for child in children:
                 if isinstance(child, dict):
@@ -287,26 +320,23 @@ def aggregate_trees(trees: List[Dict[str, Any]]) -> Dict[str, Any]:
             merge(root, tree)
 
     def finalize(node: Dict[str, Any]) -> Dict[str, Any]:
-        freq = int(node.get("freq", 0))
-        p_count = int(node.get("p_count", 0))
-        p_avg = (node["p_sum"] / p_count) if p_count > 0 else None
-
+        stats = feature_stats.get(node.get("metric_key"))
+        p_count = stats["p_count"] if stats else 0
+        p_avg = stats["p_sum"] / p_count if p_count else None
         out: Dict[str, Any] = {
             "feature": node["feature"],
             "name": node["name"],
-            "freq": freq,
-            "pct": (freq / total) if total > 0 else 0.0,
+            "freq": stats["freq"] if stats else None,
             "p": p_avg,
-            "bin": bin_from_p(p_avg) if isinstance(p_avg, (int, float)) else "medium"
+            "p_count": p_count,
+            "metric_scope": ("leaf_outcome_global" if node.get("outcome") else "feature_global") if stats else "structural",
+            "outcome": node.get("outcome"),
+            "bin": bin_from_p(p_avg) if p_avg is not None else "medium"
         }
-
-        children_map = node.get("children_map", {})
-        children_list = [finalize(v) for v in children_map.values()]
-        children_list.sort(key=lambda x: x.get("freq", 0), reverse=True)
-
-        if children_list:
-            out["children"] = children_list
-
+        children = [finalize(v) for v in node["children_map"].values()]
+        children.sort(key=lambda x: x["freq"] or 0, reverse=True)
+        if children:
+            out["children"] = children
         return out
 
     return finalize(root)
@@ -441,7 +471,8 @@ def load_leaf_meta_jsonl(path: Path) -> Dict[int, Dict[str, Any]]:
 
 
 LEAF_RULES: List[LeafRule] = parse_best_tree_txt(TREE_TXT)
-LEAF_META: Dict[int, Dict[str, Any]] = load_leaf_meta_jsonl(LEAF_META_PATH)
+# Dashboard inference reads the same node file as Visualization 1.
+# Legacy leaf_meta.jsonl is no longer used for predictions.
 
 
 def infer_feature_stats() -> Dict[str, Dict[str, float]]:
@@ -540,111 +571,70 @@ def match_rule(
     return True, path, None
 
 
-def leaf_outputs(leaf_id: int, fallback_label: int) -> Tuple[float, int, int]:
-    meta = LEAF_META.get(int(leaf_id))
-
-    if not meta:
-        p = float(fallback_label)
-        return p, int(1 if p >= 0.5 else 0), 0
-
-    p = float(meta.get("p_positive", 0.5))
-    n = int(meta.get("n_samples", 0))
-    label = int(1 if p >= 0.5 else 0)
-
-    return p, label, n
-
-
 def predict_from_best_tree(features: Dict[str, float]) -> Dict[str, Any]:
-    for rule in LEAF_RULES:
-        ok, path, warn = match_rule(rule, features)
+    """Route the shared tree without substituting probabilities or partial matches."""
+    import math
+    nodes = load_nodes(PARTIAL_TREE_JSONL)
+    child_ids = {n.get(k) for n in nodes.values() for k in ("left_child", "right_child")
+                 if n.get(k) is not None}
+    roots = [i for i in nodes if i not in child_ids]
+    if len(roots) != 1:
+        return {"ok": False, "error": "Expected exactly one tree root", "path": []}
+    node_id, path, visited = roots[0], [], set()
 
-        if ok:
-            p, label, n_samples = leaf_outputs(rule.leaf_id, rule.label)
+    def probability(n):
+        raw = n.get("p_positive")
+        if raw is None or isinstance(raw, bool):
+            return None
+        try:
+            value = float(raw)
+        except (TypeError, ValueError):
+            return None
+        return value if math.isfinite(value) and 0 <= value <= 1 else None
 
-            return {
-                "ok": True,
-                "p_positive": float(p),
-                "label": int(label),
-                "leaf_id": int(rule.leaf_id),
-                "leaf_samples": int(n_samples),
-                "leaf": {
-                    "node_id": int(rule.leaf_id),
-                    "n_samples": int(n_samples)
-                },
-                "path": path,
-                "warning": None
-            }
-
-    best: Optional[LeafRule] = None
-    best_score = -1
-    best_path: Optional[List[Dict[str, Any]]] = None
-
-    for rule in LEAF_RULES:
-        score = 0
-        path: List[Dict[str, Any]] = []
-        violated = False
-
-        for cond in rule.conditions:
-            if cond.feature not in features:
-                path.append({
-                    "feature": cond.feature,
-                    "op": cond.op,
-                    "threshold": cond.threshold,
-                    "value": None,
-                    "satisfied": None,
-                    "decision": f"{cond.feature} {cond.op} {cond.threshold}"
-                })
-                continue
-
-            value = float(features[cond.feature])
-            ok = cond.is_satisfied(value)
-
-            path.append({
-                "feature": cond.feature,
-                "op": cond.op,
-                "threshold": cond.threshold,
-                "value": value,
-                "satisfied": ok,
-                "decision": f"{cond.feature} {cond.op} {cond.threshold} (value={value})"
-            })
-
-            if ok:
-                score += 1
-            else:
-                violated = True
-                break
-
-        if violated:
-            continue
-
-        if score > best_score or (
-            score == best_score and best and len(rule.conditions) > len(best.conditions)
-        ):
-            best = rule
-            best_score = score
-            best_path = path
-
-    if best is None:
-        return {
-            "ok": False,
-            "error": "Could not match any rule from best_tree.txt"
-        }
-
-    p, label, n_samples = leaf_outputs(best.leaf_id, best.label)
-
-    return {
-        "ok": True,
-        "p_positive": float(p),
-        "label": int(label),
-        "leaf_id": int(best.leaf_id),
-        "leaf_samples": int(n_samples),
-        "leaf": {
-            "node_id": int(best.leaf_id),
-            "n_samples": int(n_samples)
-        },
-        "path": best_path,
-        "warning": "No exact leaf matched with provided values; showing best partial match based on available information."
-    }
+    while True:
+        if node_id in visited or node_id not in nodes:
+            return {"ok": False, "error": "Tree branch is missing or circular", "path": path}
+        visited.add(node_id)
+        n = nodes[node_id]
+        source = n.get("probability_source", n.get("statistics_source", "unavailable"))
+        if n.get("node_type") == "truncated" or n.get("is_truncated") is True:
+            return {"ok": False, "error": "This path reaches an omitted subtree; its final classification and probability are unknown.",
+                    "path": path, "stopped_node_id": node_id}
+        p = probability(n)
+        if n.get("is_leaf") is True:
+            label = int(p >= 0.5) if p is not None else n.get("predicted_class")
+            if label not in (0, 1):
+                return {"ok": False, "error": "Leaf classification unavailable", "path": path}
+            utilization = "High ED Utilization" if label == 1 else "Low ED Utilization"
+            demo = source == "synthetic_demo"
+            leaf = {"node_id": node_id, "n_samples": n.get("n_samples"),
+                    "p_positive": p, "label": label, "utilization_label": utilization,
+                    "probability_source": source}
+            return {"ok": True, "p_positive": p, "label": label,
+                    "utilization_label": utilization, "leaf_id": node_id,
+                    "leaf_samples": n.get("n_samples"), "leaf": leaf,
+                    "path": path, "probability_source": source, "classification_cutoff": 0.5,
+                    "warning": "Demo probabilities; not fitted model estimates." if demo else None}
+        feature = n.get("feature")
+        raw = features.get(feature)
+        if raw is None or isinstance(raw, bool):
+            return {"ok": False, "error": f"Missing input for {feature}", "missing": [feature], "path": path}
+        try:
+            value, threshold = float(raw), float(n["threshold"])
+        except (TypeError, ValueError, KeyError):
+            return {"ok": False, "error": f"Invalid value or split for {feature}", "path": path}
+        if not math.isfinite(value) or not math.isfinite(threshold):
+            return {"ok": False, "error": f"Nonfinite value for {feature}", "path": path}
+        left = value <= threshold
+        op = "<=" if left else ">"
+        path.append({"node_id": node_id, "feature": feature, "op": op,
+                     "threshold": threshold, "value": value, "satisfied": True,
+                     "branch": "left" if left else "right",
+                     "decision": f"{feature} {op} {threshold} (value={value})",
+                     "p_positive": p, "n_samples": n.get("n_samples"),
+                     "impurity": n.get("impurity"), "probability_source": source})
+        node_id = n.get("left_child" if left else "right_child")
 
 
 @app.route("/dashboard")

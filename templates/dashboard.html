@@ -10,95 +10,43 @@
   <div class="topbar">
     <div class="titleblock">
       <h1>SDoH Decision Tree Dashboard</h1>
-      <p class="sub">Adjust feature values to see the model’s predicted risk probability and the decision path.</p>
+      <p class="sub">Adjust feature values to explore demo probabilities and the decision path.</p>
     </div>
     <div class="badge" id="statusBadge">Ready</div>
   </div>
-
   <div class="layout">
     <aside class="sidebar" id="sidebar">
-      <div class="panelhead">
-        <h2>Inputs</h2>
-        <button class="btn ghost" id="resetBtn" title="Reset inputs to defaults">Reset</button>
-      </div>
-
+      <div class="panelhead"><h2>Inputs</h2><button class="btn ghost" id="resetBtn" title="Reset inputs to defaults">Reset</button></div>
       <div id="controls" class="controls"></div>
-
-      <div class="hint">
-        <div class="hinttitle">Tip</div>
-        <div class="hintbody">
-          If a feature is missing from <code>training_data.csv</code>, the slider range falls back to thresholds found in the tree.
-        </div>
-      </div>
+      <div class="hint"><div class="hinttitle">Tip</div><div class="hintbody">If a feature is missing from <code>training_data.csv</code>, the slider range falls back to thresholds found in the tree.</div></div>
     </aside>
-
     <main class="main">
       <section class="card">
-        <div class="cardhead">
-          <h2>Prediction</h2>
-          <button class="btn" id="predictBtn">Run</button>
-        </div>
-
+        <div class="cardhead"><h2>Prediction</h2><button class="btn" id="predictBtn">Run</button></div>
         <div class="predgrid">
-          <div class="metric">
-            <div class="k">Predicted label</div>
-            <div class="v" id="predLabel">—</div>
-          </div>
-          <div class="metric">
-            <div class="k">p(risk=1)</div>
-            <div class="v" id="predProb">—</div>
-          </div>
-          <div class="metric">
-            <div class="k">Leaf node</div>
-            <div class="v" id="leafNode">—</div>
-          </div>
-          <div class="metric">
-            <div class="k">Samples (leaf)</div>
-            <div class="v" id="leafSamples">—</div>
-          </div>
+          <div class="metric"><div class="k">Predicted label</div><div class="v" id="predLabel">—</div></div>
+          <div class="metric"><div class="k">Positive-class probability</div><div class="v" id="predProb">—</div></div>
+          <div class="metric"><div class="k">Leaf node</div><div class="v" id="leafNode">—</div></div>
+          <div class="metric"><div class="k">Samples (leaf)</div><div class="v" id="leafSamples">—</div></div>
         </div>
-
-        <div class="barwrap">
-          <div class="barlabel">Probability</div>
-          <div class="bar">
-            <div class="barfill" id="probFill" style="width:0%"></div>
-          </div>
-          <div class="barpct" id="probPct">0%</div>
-        </div>
+        <div class="barwrap"><div class="barlabel">Probability</div><div class="bar"><div class="barfill" id="probFill" style="width:0%"></div></div><div class="barpct" id="probPct">—</div></div>
       </section>
-
-      <style>
-        #statusBadge {
-  display: none;
-}
-      </style>
-
+      <style>#statusBadge { display: none; }</style>
       <section class="card">
-        <div class="cardhead">
-          <h2>Decision path</h2>
-          <div class="small">Shows exactly how the tree routed your input.</div>
-        </div>
-          <div id="pathViz" class="pathviz"></div>
-          <div id="path" class="path"></div>
-        <div id="path" class="path"></div>
+        <div class="cardhead"><h2>Decision path</h2><div class="small">Shows how the shared tree routes your input.</div></div>
+        <div id="pathViz" class="pathviz"></div><div id="path" class="path"></div>
       </section>
-
       <section class="card">
-        <div class="cardhead">
-          <h2>Notes for practitioners</h2>
-          <div class="small">Use probabilities as decision support, not as the sole basis for action.</div>
-        </div>
+        <div class="cardhead"><h2>Notes for practitioners</h2><div class="small">Demo probabilities illustrate this visualization; they are not fitted patient risks.</div></div>
         <ul class="bullets">
-          <li><b>What you’re seeing:</b> the model’s estimated probability of the positive class (risk=1) at the reached leaf.</li>
-          <li><b>How to interpret:</b> higher p(risk=1) means the tree has seen similar profiles in training that were more often labeled high risk.</li>
-          <li><b>Transparency:</b> the “Decision path” lists each split and your value at that split.</li>
+          <li><b>What you’re seeing:</b> the same synthetic demonstration probabilities as the first visualization.</li>
+          <li><b>How to interpret:</b> a probability ≥ 0.5 displays High ED Utilization; a probability &lt; 0.5 displays Low ED Utilization. Sample counts are unavailable.</li>
+          <li><b>Transparency:</b> the “Decision path” lists each visited split and your value. Omitted branches have no final prediction. Printed split thresholds may be rounded.</li>
         </ul>
       </section>
     </main>
   </div>
-
   <script>
-    // Server-injected feature list + stats
     window.__FEATURES__ = {{ features | tojson }};
     window.__STATS__ = {{ feature_stats | tojson }};
   </script>
